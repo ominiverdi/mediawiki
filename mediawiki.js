@@ -364,6 +364,44 @@ var MediaWiki = {};
     }
 
     /**
+     * Request the content of page by revision ID
+     * @param the revision ID of the page
+     * @param isPriority (optional) should the request be added to the top of the request queue (defualt: false)
+     */
+    Bot.prototype.parse = function (id, isPriority) {
+        return _parse.call(this, { page: id }, isPriority);
+    };
+    // does the work of Bot.prototype.parse 
+    function _parse(query, isPriority) {
+        var promise = new Promise();
+        
+        //params = {action:'parse',page:line.title,mobileformat:true,redirects:true};
+        query.action = "parse";
+        query.mobileformat = true;
+        query.redirects = true;
+        
+        this.get(query, isPriority).complete(function (data) {
+            // console.log(data);
+            // console.log(data.parse);
+            // var pages = Object.getOwnPropertyNames(data.query.pages);
+            var page = data.parse;
+            var _this = this;
+            promise._onComplete.call(_this, page.title, page.text["*"], page.revid, page.categories);
+
+
+            // pages.forEach(function (id) {
+            //     var page = data.query.pages[id];
+            //     promise._onComplete.call(_this, page.title, page.revisions[0]["*"], new Date(page.revisions[0].timestamp));
+            // });
+        }).error(function (err) {
+            promise._onError.call(this, err);
+        });
+        
+        return promise;
+    }
+
+
+    /**
      * Request the history of page by title
      * @param title the title of the page
      * @param count how many revisions back to return
@@ -400,6 +438,8 @@ var MediaWiki = {};
         
         return promise;
     };
+
+
 
     /**
      * Request the members of a category by category title
