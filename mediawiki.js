@@ -364,35 +364,48 @@ var MediaWiki = {};
     }
 
     /**
-     * Request the content of page by revision ID
-     * @param the revision ID of the page
+     * Parses the content of a given pagename
+     * @param pagename the page name
      * @param isPriority (optional) should the request be added to the top of the request queue (defualt: false)
      */
-    Bot.prototype.parse = function (id, isPriority) {
-        return _parse.call(this, { page: id }, isPriority);
+    Bot.prototype.parse = function (pagename, isPriority) {
+        return _parse.call(this, { page: pagename }, isPriority);
     };
     // does the work of Bot.prototype.parse
     function _parse(query, isPriority) {
         var promise = new Promise();
-
-        //params = {action:'parse',page:line.title,mobileformat:true,redirects:true};
         query.action = "parse";
         query.mobileformat = true;
         query.redirects = true;
-
         this.get(query, isPriority).complete(function (data) {
-            // console.log(data);
-            // console.log(data.parse);
-            // var pages = Object.getOwnPropertyNames(data.query.pages);
             var page = data.parse;
             var _this = this;
             promise._onComplete.call(_this, page.title, page.text["*"], page.revid, page.categories);
+        }).error(function (err) {
+            promise._onError.call(this, err);
+        });
+        return promise;
+    }
 
-
-            // pages.forEach(function (id) {
-            //     var page = data.query.pages[id];
-            //     promise._onComplete.call(_this, page.title, page.revisions[0]["*"], new Date(page.revisions[0].timestamp));
-            // });
+    /**
+     * Request the list of allpages
+     * @param from starting index
+     * @param limit limits the list of pages to this number
+     * @param isPriority (optional) should the request be added to the top of the request queue (defualt: false)
+     */
+    Bot.prototype.allpages = function ( from, limit, isPriority) {
+        return _allpages.call(this, { apfrom: from,aplimit: limit }, isPriority);
+    };
+    // does the work of Bot.prototype.allpages
+    function _allpages(query, isPriority) {
+        var promise = new Promise();
+        query.action = "query";
+        query.apfilterredir = "nonredirects";
+        query.list = 'allpages';
+        this.get(query, isPriority).complete(function (data) {
+            var pages = data.query.allpages;
+            var _this = this;
+            promise._onComplete.call(_this, pages);
         }).error(function (err) {
             promise._onError.call(this, err);
         });
@@ -401,37 +414,24 @@ var MediaWiki = {};
     }
 
     /**
-     * Request the content of page by revision ID
-     * @param the revision ID of the page
+     * Request the contributions of a user by username
+     * @param username the user name
+     * @param limit the max results limit
      * @param isPriority (optional) should the request be added to the top of the request queue (defualt: false)
      */
-    Bot.prototype.allpages = function ( from, limit, isPriority) {
-        return _allpages.call(this, { apfrom: from,aplimit: limit }, isPriority);
+    Bot.prototype.userContribs = function (username,  limit, isPriority) {
+        return _usercontribs.call(this, {ucuser:username, uclimit: limit }, isPriority);
     };
     // does the work of Bot.prototype.parse
-    function _allpages(query, isPriority) {
+    function _usercontribs(query, isPriority) {
         var promise = new Promise();
-
-        //params = {action:'parse',page:line.title,mobileformat:true,redirects:true};
         query.action = "query";
-        query.apfilterredir = "nonredirects";
-        // query.apfrom = 0;
-        // query.aplimit = 5000;
-        query.list = 'allpages';
-
+        query.ucdir = "newer";
+        query.list = 'usercontribs';
         this.get(query, isPriority).complete(function (data) {
-            // console.log(data);
-            // console.log(data.parse);
-            // var pages = Object.getOwnPropertyNames(data.query.pages);
-            var pages = data.query.allpages;
+            var usercontribs = data.query.usercontribs;
             var _this = this;
-            promise._onComplete.call(_this, pages);
-
-
-            // pages.forEach(function (id) {
-            //     var page = data.query.pages[id];
-            //     promise._onComplete.call(_this, page.title, page.revisions[0]["*"], new Date(page.revisions[0].timestamp));
-            // });
+            promise._onComplete.call(_this, usercontribs);
         }).error(function (err) {
             promise._onError.call(this, err);
         });
