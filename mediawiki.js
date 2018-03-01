@@ -417,16 +417,16 @@ var MediaWiki = {};
      * Request the contributions of a user by username
      * @param username the user name
      * @param limit the max results limit
+     * @param order "newer" first or "older" first?
      * @param isPriority (optional) should the request be added to the top of the request queue (defualt: false)
      */
-    Bot.prototype.userContribs = function (username,  limit, isPriority) {
-        return _usercontribs.call(this, {ucuser:username, uclimit: limit }, isPriority);
+    Bot.prototype.userContribs = function (username,  limit, order, isPriority) {
+        return _usercontribs.call(this, {ucuser:username, uclimit: limit, ucdir:order }, isPriority);
     };
     // does the work of Bot.prototype.parse
     function _usercontribs(query, isPriority) {
         var promise = new Promise();
         query.action = "query";
-        query.ucdir = "newer";
         query.list = 'usercontribs';
         this.get(query, isPriority).complete(function (data) {
             var usercontribs = data.query.usercontribs;
