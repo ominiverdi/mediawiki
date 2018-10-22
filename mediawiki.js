@@ -380,6 +380,7 @@ var MediaWiki = {};
         this.get(query, isPriority).complete(function (data) {
             var page = data.parse;
             var _this = this;
+            console.log('!!!!\nmediawiki parse page:',page);
             promise._onComplete.call(_this, page.title, page.text["*"], page.revid, page.categories);
         }).error(function (err) {
             promise._onError.call(this, err);
