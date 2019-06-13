@@ -414,6 +414,33 @@ var MediaWiki = {};
     }
 
     /**
+     * Request the list of allimages
+     * @param from starting index
+     * @param limit limits the list of pages to this number
+     * @param isPriority (optional) should the request be added to the top of the request queue (defualt: false)
+     */
+    Bot.prototype.allimages = function ( limit, isPriority) {
+        return _allimages.call(this, { limit: limit }, isPriority);
+    };
+    // does the work of Bot.prototype.allimages
+    function _allimages( limit, isPriority) {
+        var promise = new Promise();
+        query.action = "query";
+        query.ailimit = limit;
+        query.list = 'allimages';
+        this.get(query, isPriority).complete(function (data) {
+            var images = data.query.allimages;
+            var _this = this;
+            promise._onComplete.call(_this, images);
+        }).error(function (err) {
+            promise._onError.call(this, err);
+        });
+
+        return promise;
+    }
+
+
+    /**
      * Request the contributions of a user by username
      * @param username the user name
      * @param limit the max results limit
