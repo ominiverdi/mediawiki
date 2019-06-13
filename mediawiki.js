@@ -420,13 +420,12 @@ var MediaWiki = {};
      * @param isPriority (optional) should the request be added to the top of the request queue (defualt: false)
      */
     Bot.prototype.allimages = function ( limit, isPriority) {
-        return _allimages.call(this, { limit: limit }, isPriority);
+        return _allimages.call(this, { ailimit: limit }, isPriority);
     };
     // does the work of Bot.prototype.allimages
-    function _allimages( limit, isPriority) {
+    function _allimages( query, isPriority) {
         var promise = new Promise();
         query.action = "query";
-        query.ailimit = limit;
         query.list = 'allimages';
         this.get(query, isPriority).complete(function (data) {
             var images = data.query.allimages;
