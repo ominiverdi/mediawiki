@@ -399,45 +399,36 @@ var MediaWiki = {};
     // does the work of Bot.prototype.allpages
     function _allpages(query, isPriority) {
         var promise = new Promise();
+        var pageObjects = [];
         query.action = "query";
         query.apfilterredir = "nonredirects";
         query.list = 'allpages';
         this.get(query, isPriority).complete(function (data) {
             var pages = data.query.allpages;
             var _this = this;
-            promise._onComplete.call(_this, pages);
+            var i = 0;
+            pages.forEach(page => {
+                console.log('Requesting page: ',page.title)
+            this.parse(page.title).complete(function (title, text, revid, categories, images, links, externallinks) {
+                let pageObject = {
+                    title:title, text:text, revid:revid, categories:categories, images:images, links:links, externallinks:externallinks
+                }
+                pageObjects.push(pageObject)
+                console.log('Queying page: ',title)
+                // promise._onComplete.call(_this, pages);
+                if(title==pages[pages.length-1].title){
+                    console.log('Returning pages: ',pageObjects.length)
+                    promise._onComplete.call(_this, pageObjects);
+                }
+            });
+        });
+            
         }).error(function (err) {
             promise._onError.call(this, err);
         });
 
         return promise;
     }
-
-    /**
-     * Request the list of allimages
-     * @param from starting index
-     * @param limit limits the list of pages to this number
-     * @param isPriority (optional) should the request be added to the top of the request queue (defualt: false)
-     */
-    Bot.prototype.allimages = function ( limit, isPriority) {
-        return _allimages.call(this, { ailimit: limit }, isPriority);
-    };
-    // does the work of Bot.prototype.allimages
-    function _allimages( query, isPriority) {
-        var promise = new Promise();
-        query.action = "query";
-        query.list = 'allimages';
-        this.get(query, isPriority).complete(function (data) {
-            var images = data.query.allimages;
-            var _this = this;
-            promise._onComplete.call(_this, images);
-        }).error(function (err) {
-            promise._onError.call(this, err);
-        });
-
-        return promise;
-    }
-
 
     /**
      * Request the contributions of a user by username
