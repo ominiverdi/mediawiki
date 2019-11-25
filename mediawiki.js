@@ -417,10 +417,9 @@ var MediaWiki = {};
      * @param limit limits the list of pages to this number
      * @param isPriority (optional) should the request be added to the top of the request queue (defualt: false)
      */
-    Bot.prototype.allimages = function (from, limit, isPriority) {
+    Bot.prototype.allimages = function ( from, isPriority) {
         return _allimages.call(this, {
-            apfrom: from,
-            aplimit: limit
+            aifrom:from
         }, isPriority);
     };
     // does the work of Bot.prototype.allpages
@@ -449,9 +448,9 @@ var MediaWiki = {};
                     }
                     pageObjects.push(JSON.stringify(pageObject))
                     console.log('Queying image: ', name)
-                    console.log('Queying url: ', url)
+                    console.log('Queying url: ', url,pages[pages.length - 1].url)
                     // promise._onComplete.call(_this, pages);
-                    if (title == pages[pages.length - 1].title) {
+                    if (url == pages[pages.length - 1].url) {
                         console.log('Downloading image: ', pageObjects.length)
                         promise._onComplete.call(_this, pageObjects);
                     }
