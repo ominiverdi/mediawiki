@@ -417,6 +417,59 @@ var MediaWiki = {};
      * @param limit limits the list of pages to this number
      * @param isPriority (optional) should the request be added to the top of the request queue (defualt: false)
      */
+    Bot.prototype.allimages = function (from, limit, isPriority) {
+        return _allimages.call(this, {
+            apfrom: from,
+            aplimit: limit
+        }, isPriority);
+    };
+    // does the work of Bot.prototype.allpages
+    function _allimages(query, isPriority) {
+        var promise = new Promise();
+        var pageObjects = [];
+        query.action = "query";
+        // query.apfilterredir = "nonredirects";
+        query.list = 'allimages';
+        this.get(query, isPriority).complete(function (data) {
+            // console.log(data);
+            var pages = data.query.allimages;
+            var _this = this;
+            var i = 0;
+            pages.forEach(page => {
+                console.log('Requesting image: ', page.title)
+                this.parse(page.title).complete(function (name, timestamp, url, descriptionurl, descriptionshorturl, ns, title) {
+                    let pageObject = {
+                        name: name,
+                        timestamp: timestamp,
+                        url: url,
+                        descriptionurl: descriptionurl,
+                        descriptionshorturl: descriptionshorturl,
+                        ns: ns,
+                        title: title
+                    }
+                    pageObjects.push(JSON.stringify(pageObject))
+                    console.log('Queying image: ', name)
+                    console.log('Queying url: ', url)
+                    // promise._onComplete.call(_this, pages);
+                    if (title == pages[pages.length - 1].title) {
+                        console.log('Downloading image: ', pageObjects.length)
+                        promise._onComplete.call(_this, pageObjects);
+                    }
+                });
+            });
+
+        }).error(function (err) {
+            promise._onError.call(this, err);
+        });
+
+        return promise;
+    }
+    /**
+     * Request the list of allpages
+     * @param from starting index
+     * @param limit limits the list of pages to this number
+     * @param isPriority (optional) should the request be added to the top of the request queue (defualt: false)
+     */
     Bot.prototype.allpages = function (from, limit, isPriority) {
         return _allpages.call(this, {
             apfrom: from,
