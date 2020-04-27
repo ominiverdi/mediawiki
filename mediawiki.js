@@ -252,6 +252,8 @@ var MediaWiki = {};
             lgname: username,
             lgpassword: password
         }, isPriority).complete(function (data) {
+            console.log(data);
+            
             switch (data.login.result) {
                 case "Success":
                     promise._onComplete.call(this, data.login.lgusername);
@@ -436,25 +438,8 @@ var MediaWiki = {};
             var i = 0;
             pages.forEach(page => {
                 console.log('Requesting image: ', page.title)
-                this.parse(page.title).complete(function (name, timestamp, url, descriptionurl, descriptionshorturl, ns, title) {
-                    let pageObject = {
-                        name: name,
-                        timestamp: timestamp,
-                        url: url,
-                        descriptionurl: descriptionurl,
-                        descriptionshorturl: descriptionshorturl,
-                        ns: ns,
-                        title: title
-                    }
-                    pageObjects.push(JSON.stringify(pageObject))
-                    console.log('Queying image: ', name)
-                    console.log('Queying url: ', url,pages[pages.length - 1].url)
-                    // promise._onComplete.call(_this, pages);
-                    if (url == pages[pages.length - 1].url) {
-                        console.log('Downloading image: ', pageObjects.length)
-                        promise._onComplete.call(_this, pageObjects);
-                    }
-                });
+                promise._onComplete.call(_this, page);
+                
             });
 
         }).error(function (err) {
