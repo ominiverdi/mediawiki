@@ -427,20 +427,20 @@ var MediaWiki = {};
     // does the work of Bot.prototype.allpages
     function _allimages(query, isPriority) {
         var promise = new Promise();
-        var pageObjects = [];
+        var output = [];
         query.action = "query";
         // query.apfilterredir = "nonredirects";
         query.list = 'allimages';
         this.get(query, isPriority).complete(function (data) {
             // console.log(data);
-            var pages = data.query.allimages;
+            var images = data.query.allimages;
             var _this = this;
             var i = 0;
-            pages.forEach(page => {
-                console.log('Requesting image: ', page.title)
-                promise._onComplete.call(_this, page);
-                
+            images.forEach(image => {
+                // console.log('Requesting image: ', image.title)
+                output.push(image);
             });
+            promise._onComplete.call(_this, output);
 
         }).error(function (err) {
             promise._onError.call(this, err);
